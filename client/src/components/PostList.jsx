@@ -1,40 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { postService } from '../services/api';
+
+const SAMPLE_POSTS = [
+  {
+    _id: '1',
+    title: 'Getting Started with MERN Stack',
+    excerpt: 'Learn how to build full-stack applications with MongoDB, Express, React, and Node.js.',
+    content: 'The MERN stack is a powerful combination of technologies that allows you to build modern web applications...',
+    author: { name: 'John Doe' },
+    createdAt: new Date('2024-03-15'),
+    comments: [],
+    viewCount: 125,
+    featuredImage: 'https://picsum.photos/800/400'
+  },
+  {
+    _id: '2',
+    title: 'React Hooks Explained',
+    excerpt: 'A comprehensive guide to React Hooks and how to use them effectively in your applications.',
+    content: 'React Hooks were introduced in React 16.8 to allow you to use state and other React features without writing a class...',
+    author: { name: 'Jane Smith' },
+    createdAt: new Date('2024-03-14'),
+    comments: [],
+    viewCount: 89,
+    featuredImage: 'https://picsum.photos/800/401'
+  },
+  {
+    _id: '3',
+    title: 'MongoDB Best Practices',
+    excerpt: 'Learn the best practices for designing and managing MongoDB databases.',
+    content: 'When working with MongoDB, it\'s important to follow certain best practices to ensure optimal performance...',
+    author: { name: 'Mike Johnson' },
+    createdAt: new Date('2024-03-13'),
+    comments: [],
+    viewCount: 156,
+    featuredImage: 'https://picsum.photos/800/402'
+  }
+];
 
 const PostList = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  useEffect(() => {
-    fetchPosts();
-  }, [page]);
-
-  const fetchPosts = async () => {
-    try {
-      const response = await postService.getAllPosts(page);
-      setPosts(prevPosts => 
-        page === 1 ? response.data : [...prevPosts, ...response.data]
-      );
-      setHasMore(response.pagination.page < response.pagination.pages);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch posts');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading && page === 1) {
-    return <div className="text-center py-4">Loading posts...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center py-4">{error}</div>;
-  }
+  const [posts] = useState(SAMPLE_POSTS);
 
   return (
     <div className="space-y-6">
@@ -48,7 +52,7 @@ const PostList = () => {
             />
           )}
           <h2 className="text-2xl font-bold mb-2">
-            <Link to={`/posts/${post.slug}`} className="hover:text-blue-600">
+            <Link to={`/posts/${post._id}`} className="hover:text-blue-600">
               {post.title}
             </Link>
           </h2>
@@ -67,16 +71,6 @@ const PostList = () => {
           </div>
         </article>
       ))}
-      {hasMore && (
-        <div className="text-center py-4">
-          <button
-            onClick={() => setPage(p => p + 1)}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Load More
-          </button>
-        </div>
-      )}
     </div>
   );
 };

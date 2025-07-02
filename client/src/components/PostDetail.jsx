@@ -1,51 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { postService } from '../services/api';
-import CommentForm from './CommentForm';
+
+const SAMPLE_POSTS = {
+  '1': {
+    _id: '1',
+    title: 'Getting Started with MERN Stack',
+    content: `The MERN stack is a powerful combination of technologies that allows you to build modern web applications. 
+    
+    MongoDB provides a flexible, scalable database solution. Express.js gives you a robust backend framework. React makes building user interfaces a breeze. And Node.js ties it all together with a JavaScript runtime that powers your server.
+    
+    In this post, we'll explore how to:
+    - Set up your development environment
+    - Create a MongoDB database
+    - Build an Express.js server
+    - Develop a React frontend
+    - Connect all the pieces together`,
+    author: { 
+      _id: '101',
+      name: 'John Doe' 
+    },
+    createdAt: new Date('2024-03-15'),
+    comments: [
+      {
+        _id: 'c1',
+        user: { name: 'Alice' },
+        content: 'Great introduction to MERN stack!',
+        createdAt: new Date('2024-03-15T10:00:00')
+      },
+      {
+        _id: 'c2',
+        user: { name: 'Bob' },
+        content: 'Looking forward to trying this out.',
+        createdAt: new Date('2024-03-15T11:30:00')
+      }
+    ],
+    viewCount: 125,
+    featuredImage: 'https://picsum.photos/800/400',
+    tags: ['MERN', 'Web Development', 'JavaScript', 'Tutorial']
+  }
+};
 
 const PostDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchPost();
-  }, [slug]);
-
-  const fetchPost = async () => {
-    try {
-      const response = await postService.getPost(slug);
-      setPost(response.data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch post');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this post?')) {
-      return;
-    }
-
-    try {
-      await postService.deletePost(post._id);
-      navigate('/');
-    } catch (err) {
-      setError('Failed to delete post');
-    }
-  };
-
-  if (loading) {
-    return <div className="text-center py-4">Loading post...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center py-4">{error}</div>;
-  }
+  const post = SAMPLE_POSTS[slug];
 
   if (!post) {
     return <div className="text-center py-4">Post not found</div>;
@@ -68,7 +66,7 @@ const PostDetail = () => {
         <span className="mx-2">•</span>
         <span>{post.viewCount} views</span>
       </div>
-      <div className="prose max-w-none mb-8">{post.content}</div>
+      <div className="prose max-w-none mb-8 whitespace-pre-wrap">{post.content}</div>
       <div className="flex items-center space-x-4 mb-8">
         {post.tags.map(tag => (
           <span
@@ -79,26 +77,8 @@ const PostDetail = () => {
           </span>
         ))}
       </div>
-      {/* Show edit/delete buttons for author or admin */}
-      {post.author._id === localStorage.getItem('userId') && (
-        <div className="flex space-x-4 mb-8">
-          <button
-            onClick={() => navigate(`/posts/${post._id}/edit`)}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Edit Post
-          </button>
-          <button
-            onClick={handleDelete}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            Delete Post
-          </button>
-        </div>
-      )}
       <div className="border-t pt-8">
         <h2 className="text-2xl font-bold mb-4">Comments ({post.comments.length})</h2>
-        <CommentForm postId={post._id} onCommentAdded={fetchPost} />
         <div className="space-y-4 mt-6">
           {post.comments.map(comment => (
             <div key={comment._id} className="bg-gray-50 p-4 rounded">
